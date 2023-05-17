@@ -1,4 +1,5 @@
 # ntp-script
+Script used to get NTP time from time server verifying operations. 
 
 # detectify-script
 Before running this script OS Environmental Variavles DETFY_KEY and DETFY_SECRET_KEY must be present.
