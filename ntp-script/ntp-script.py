@@ -22,4 +22,8 @@ def getTime(host = "AAA.BBB.CCC.DDD"):
         return time.ctime(t).replace("  "," ")
 
 if __name__ == "__main__":
-    print(getTime())
+    try:
+        ip_address = raw_input('Enter IP Address: ')
+    except:
+        ip_address = input('Enter IP Address: ')
+    print(getTime(ip_address))

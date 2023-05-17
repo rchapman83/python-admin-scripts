@@ -3,8 +3,8 @@
 # detectify-script
 Before running this script OS Environmental Variavles DETFY_KEY and DETFY_SECRET_KEY must be present.
 
-DETFY_KEY = Detectify API-key
-DETFY_SECRET_KEY = Detectify API-secret
+`DETFY_KEY = Detectify API-key` <br>
+`DETFY_SECRET_KEY = Detectify API-secret`
 
 # cleanup-script
 :snake: A pair of Python 3+ scripts i've put together to clean up those pesky log directories.
