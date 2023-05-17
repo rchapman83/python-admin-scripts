@@ -1,0 +1,49 @@
+---
+version: 1
+disable_existing_loggers: False
+formatters:
+  simple:
+    format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    datefmt: "%Y-%m-%d %H:%M:%S"
+  colour_console:
+    format: "[%(hostname)s] : %(levelname)s - %(asctime)s - %(message)s"
+    datefmt: "%Y-%m-%d %H:%M:%S"
+  detail:
+    format: "%(asctime)s - %(levelname)s - <PID %(process)d:%(processName)s> : %(name)s.%(funcName)s() -  %(message)s"
+    datefmt: "%Y-%m-%d %H:%M:%S"
+
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: INFO
+    formatter: colour_console
+    stream: ext://sys.stdout
+    
+  file_handler_1:
+    class: logging.handlers.RotatingFileHandler
+    level: INFO
+    formatter: detail
+    filename: cleanup_current.log
+    maxBytes: 512000
+    backupCount: 3
+    encoding: utf8
+    
+  file_handler_2:
+    class: logging.handlers.RotatingFileHandler
+    level: ERROR
+    formatter: detail
+    filename: cleanup_current.log
+    maxBytes: 512000
+    backupCount: 3
+    encoding: utf8
+    
+loggers:
+  cleanup_logger:
+    level: INFO
+    handlers: [console]
+    propagate: no
+
+root:
+  level: DEBUG
+  handlers: [console, file_handler_1, file_handler_2]
+...
