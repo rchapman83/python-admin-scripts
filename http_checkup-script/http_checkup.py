@@ -1,6 +1,7 @@
 from urllib.request import urlopen, Request
 from urllib.error import URLError, HTTPError
 from datetime import datetime
+import csv
 
 def get_website_status_urllib(url):
     req = Request(url)
@@ -13,6 +14,54 @@ def get_website_status_urllib(url):
         return f"We failed to reach a server. Reason: {e.reason}"
     except Exception as e:
         return f"An unexpected error occurred: {e}"
+
+
+def process_zone_file(file_path):
+    try:
+        with open(file_path, 'r') as f:
+            lines = f.readlines()
+    except FileNotFoundError:
+        print(f"File {file_path} not found.")
+        return
+    with open('output.csv', 'a', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        for line in lines:
+            line = line.strip()
+            if not line or line.startswith(';') or line.startswith('#'):
+                continue
+            fields = line.split()
+            if len(fields) < 3:
+                continue
+            domain = fields[0].rstrip('.')
+            if 'IN' in fields:
+                in_index = fields.index('IN')
+                if in_index + 1 < len(fields):
+                    record_type = fields[in_index + 1]
+                else:
+                    continue
+            else:
+                if len(fields) < 2:
+                    continue
+                record_type = fields[1]
+            if record_type in ('A', 'CNAME'):
+                if not domain.startswith(('http://', 'https://')):
+                    domain = 'https://' + domain
+                # Perform the check directly
+                req = Request(domain)
+                try:
+                    with urlopen(req) as response:
+                        message = "Website is working fine."
+                        status = str(response.getcode())
+                except HTTPError as e:
+                    message = "The server couldn't fulfill the request."
+                    status = str(e.code)
+                except URLError as e:
+                    message = "We failed to reach a server."
+                    status = ''
+                except Exception as e:
+                    message = "An unexpected error occurred."
+                    status = ''
+                writer.writerow([domain, message, status])
 
 
 # Text/CLI based menu 
@@ -46,7 +95,8 @@ if __name__ == "__main__":
             print("Check completed. Results logged to output.log")
         elif option == 2:
             file_to_load = input("Enter the path to the file containing URLs to check:\n")
-            exit()
+            process_zone_file(file_to_load)
+            print("Zone file processed. Results appended to output.csv")
         elif option == 0:
             print("Exiting...")
             exit()

@@ -1,3 +1,6 @@
+# http_checkup-script
+I'll put a description here later
+
 # ntp-script
 Script used to get NTP time from time server verifying operations. 
 
