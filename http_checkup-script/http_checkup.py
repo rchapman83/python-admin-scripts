@@ -66,8 +66,8 @@ def process_zone_file(file_path):
 
 # Text/CLI based menu 
 menu_options = {
-	1: "Check single website",
-	2: "Cloudflare exported list check",
+	1: "HTTP check single website",
+	2: "HTTP check bulk [Cloudflare zone file]",
 	0: "Exit",
 }
 
