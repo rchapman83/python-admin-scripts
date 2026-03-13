@@ -1,0 +1,31 @@
+;;
+;; Domain:     examplecorp.com.
+;; Exported:   2026-03-13
+;;
+
+;; SOA Record
+examplecorp.com.    3600    IN  SOA ns1.exampledns.com. admin.examplecorp.com. 2026031301 7200 3600 1209600 3600
+
+;; NS Records
+examplecorp.com.    86400   IN  NS  ns1.exampledns.com.
+examplecorp.com.    86400   IN  NS  ns2.exampledns.com.
+
+;; A Records
+www.examplecorp.com.        300 IN  A   203.0.113.10
+api.examplecorp.com.        300 IN  A   203.0.113.11
+portal.examplecorp.com.     300 IN  A   203.0.113.12
+analytics.examplecorp.com.  300 IN  A   203.0.113.13
+dev.examplecorp.com.        300 IN  A   203.0.113.20
+staging.examplecorp.com.    300 IN  A   203.0.113.21
+status.examplecorp.com.     300 IN  A   203.0.113.22
+
+;; CNAME Records
+app.examplecorp.com.        300 IN  CNAME   www.examplecorp.com.
+cdn.examplecorp.com.        300 IN  CNAME   cdn.provider.net.
+docs.examplecorp.com.       300 IN  CNAME   docs.hosting.net.
+
+;; MX Records
+examplecorp.com.            300 IN  MX 10 mail.examplecorp.com.
+
+;; TXT Records
+examplecorp.com.            300 IN  TXT "v=spf1 include:_spf.examplemail.com ~all"
