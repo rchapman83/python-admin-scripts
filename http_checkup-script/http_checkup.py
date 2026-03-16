@@ -2,13 +2,25 @@ from urllib.request import urlopen, Request
 from urllib.error import URLError, HTTPError
 from datetime import datetime
 import csv
+import time
+
+CUSTOM_USER_AGENT = 'python-http-checkup/1.0'
+MAX_REQUESTS_PER_SECOND = 5  # throttle setting for process_zone_file
+REQUEST_INTERVAL = 1.0 / MAX_REQUESTS_PER_SECOND
 
 def get_website_status_urllib(url):
-    req = Request(url)
+    req = Request(url, headers={'User-Agent': CUSTOM_USER_AGENT})
     try:
         with urlopen(req) as response:
-            return f"Website is working fine. Status code: {response.getcode()}"
+            status_code = response.getcode()
+            final_url = response.geturl()
+            if final_url != url:
+                return f"Website redirected from {url} to {final_url}. Status code: {status_code}"
+            return f"Website is working fine. Status code: {status_code}"
     except HTTPError as e:
+        if e.code in (301, 302, 303, 307, 308):
+            location = e.headers.get('Location', 'unknown') if hasattr(e, 'headers') else 'unknown'
+            return f"Redirect detected {e.code} -> {location}."
         return f"The server couldn't fulfill the request. Error code: {e.code}"
     except URLError as e:
         return f"We failed to reach a server. Reason: {e.reason}"
@@ -44,17 +56,42 @@ def process_zone_file(file_path):
                     continue
                 record_type = fields[1]
             if record_type in ('A', 'CNAME'):
+                # Skip irrelevant records that are not real web hosts
+                irrelevant_prefixes = (
+                    '_domainkey',
+                    'autodiscover',
+                    'microsoft',
+                    '_acme-challenge',
+                    '_validation',
+                    '_dnstest',
+                    '_spf',
+                )
+                normalized = domain.lstrip('.').lower()
+                if normalized.startswith(irrelevant_prefixes):
+                    continue
+
                 if not domain.startswith(('http://', 'https://')):
                     domain = 'https://' + domain
                 # Perform the check directly
-                req = Request(domain)
+                req = Request(domain, headers={'User-Agent': CUSTOM_USER_AGENT})
                 try:
                     with urlopen(req) as response:
-                        message = "Website is working fine."
-                        status = str(response.getcode())
+                        status_code = response.getcode()
+                        final_url = response.geturl()
+                        if final_url != domain:
+                            message = f"Redirected from {domain} to {final_url}."
+                            status = str(status_code)
+                        else:
+                            message = "Website is working fine."
+                            status = str(status_code)
                 except HTTPError as e:
-                    message = "The server couldn't fulfill the request."
-                    status = str(e.code)
+                    if e.code in (301, 302, 303, 307, 308):
+                        location = e.headers.get('Location', 'unknown') if hasattr(e, 'headers') else 'unknown'
+                        message = f"Redirect detected {e.code} -> {location}."
+                        status = str(e.code)
+                    else:
+                        message = "The server couldn't fulfill the request."
+                        status = str(e.code)
                 except URLError as e:
                     message = "We failed to reach a server."
                     status = ''
@@ -62,6 +99,7 @@ def process_zone_file(file_path):
                     message = "An unexpected error occurred."
                     status = ''
                 writer.writerow([domain, message, status])
+                time.sleep(REQUEST_INTERVAL)
 
 
 # Text/CLI based menu 
