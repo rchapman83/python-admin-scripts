@@ -106,8 +106,10 @@ def process_zone_file(file_path):
 menu_options = {
 	1: "HTTP check single website",
 	2: "HTTP check bulk [Cloudflare zone file]",
-    3: "Jarm check single website",
-    4: "Jarm check bulk [Cloudflare zone file]",
+    3: "SSL/TLS fingerprint single website",
+    4: "SSL/TLS fingerprint [Cloudflare zone file]",
+    5: "Jarm check single website",
+    6: "Jarm check bulk [Cloudflare zone file]",
 	0: "Exit",
 }
 
@@ -138,11 +140,15 @@ if __name__ == "__main__":
             process_zone_file(file_to_load)
             print("Zone file processed. Results appended to output.csv")
         elif option == 3:
-            print("Jarm check single website - Not implemented yet.")
+            print("SSL/TLS fingerprint single website - Not implemented yet.")
         elif option == 4:
+            print("SSL/TLS fingerprint [Cloudflare zone file] - Not implemented yet.")
+        elif option == 5:
+            print("Jarm check single website - Not implemented yet.")
+        elif option == 6:
             print("Jarm check bulk [Cloudflare zone file] - Not implemented yet.")
         elif option == 0:
             print("Exiting...")
             exit()
 else:
-   print("Invalid selection. Please enter a number between 0 and 2.")
+   print("Invalid selection. Please enter a number between 0 and 6.")
