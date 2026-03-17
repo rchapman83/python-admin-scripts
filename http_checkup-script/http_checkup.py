@@ -4,11 +4,13 @@ from datetime import datetime
 import csv
 import time
 
+LOG_FILE = 'output.log'
+BULK_OUTPUT_FILE = 'output.csv'
 CUSTOM_USER_AGENT = 'python-http-checkup/1.0'
 MAX_REQUESTS_PER_SECOND = 5  # throttle setting for process_zone_file
 REQUEST_INTERVAL = 1.0 / MAX_REQUESTS_PER_SECOND
 
-def get_website_status_urllib(url):
+def get_website_status(url):
     req = Request(url, headers={'User-Agent': CUSTOM_USER_AGENT})
     try:
         with urlopen(req) as response:
@@ -35,7 +37,7 @@ def process_zone_file(file_path):
     except FileNotFoundError:
         print(f"File {file_path} not found.")
         return
-    with open('output.csv', 'a', newline='') as csvfile:
+    with open(BULK_OUTPUT_FILE, 'a', newline='') as csvfile:
         writer = csv.writer(csvfile)
         for line in lines:
             line = line.strip()
@@ -107,9 +109,7 @@ menu_options = {
 	1: "HTTP check single website",
 	2: "HTTP check bulk [Cloudflare zone file]",
     3: "SSL/TLS fingerprint single website",
-    4: "SSL/TLS fingerprint [Cloudflare zone file]",
-    5: "Jarm check single website",
-    6: "Jarm check bulk [Cloudflare zone file]",
+    4: "Jarm check single website",
 	0: "Exit",
 }
 
@@ -130,25 +130,21 @@ if __name__ == "__main__":
             url_to_check = input("Enter the URL of the website to check:\n")            
             if not url_to_check.startswith(('http://', 'https://')):
                 url_to_check = 'https://' + url_to_check            
-            result = get_website_status_urllib(url_to_check)
+            result = get_website_status(url_to_check)
             timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            with open('output.log', 'a') as f:
+            with open(LOG_FILE, 'a') as f:
                 f.write(f"{timestamp}: {url_to_check} >>> {result}\n")
-            print("Check completed. Results logged to output.log")
+            print("Check completed. Results logged to "+LOG_FILE)
         elif option == 2:
             file_to_load = input("Enter the path to the file containing URLs to check:\n")
             process_zone_file(file_to_load)
-            print("Zone file processed. Results appended to output.csv")
+            print("Zone file processed. Results appended to "+BULK_OUTPUT_FILE)
         elif option == 3:
             print("SSL/TLS fingerprint single website - Not implemented yet.")
         elif option == 4:
-            print("SSL/TLS fingerprint [Cloudflare zone file] - Not implemented yet.")
-        elif option == 5:
             print("Jarm check single website - Not implemented yet.")
-        elif option == 6:
-            print("Jarm check bulk [Cloudflare zone file] - Not implemented yet.")
         elif option == 0:
             print("Exiting...")
             exit()
 else:
-   print("Invalid selection. Please enter a number between 0 and 6.")
+   print("Invalid selection. Please enter a number between 0 and 4.")
