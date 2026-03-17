@@ -1,6 +1,10 @@
 from urllib.request import urlopen, Request
 from urllib.error import URLError, HTTPError
+from urllib.parse import urlparse
 from datetime import datetime
+import ssl
+import socket
+import hashlib
 import csv
 import time
 
@@ -28,6 +32,45 @@ def get_website_status(url):
         return f"We failed to reach a server. Reason: {e.reason}"
     except Exception as e:
         return f"An unexpected error occurred: {e}"
+
+def get_website_fingerprint(url):
+    parsed = urlparse(url)
+    if not parsed.scheme:
+        url = 'https://' + url
+        parsed = urlparse(url)
+    host = parsed.hostname
+    port = parsed.port or 443
+
+    if not host:
+        message = f"Invalid URL: {url}"
+        print(message)
+        return None
+
+    context = ssl.create_default_context()
+    try:
+        with socket.create_connection((host, port), timeout=10) as sock:
+            with context.wrap_socket(sock, server_hostname=host) as ssock:
+                der_cert = ssock.getpeercert(binary_form=True)
+                sha256 = hashlib.sha256(der_cert).hexdigest().upper()
+                fingerprint = ':'.join(sha256[i:i+2] for i in range(0, len(sha256), 2))
+                cert = ssock.getpeercert()
+                subject = cert.get('subject', ())
+                issuer = cert.get('issuer', ())
+                message = (
+                    f"SSL/TLS fingerprint for {url}: {fingerprint}. "
+                    f"Subject: {subject}. Issuer: {issuer}."
+                )
+                timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                with open(LOG_FILE, 'a') as f:
+                    f.write(f"{timestamp}: {message}\n")
+                return fingerprint
+    except Exception as e:
+        message = f"Error getting fingerprint for {url}: {e}"
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        with open(LOG_FILE, 'a') as f:
+            f.write(f"{timestamp}: {message}\n")
+        print(message)
+        return None
 
 
 def process_zone_file(file_path):
@@ -140,7 +183,14 @@ if __name__ == "__main__":
             process_zone_file(file_to_load)
             print("Zone file processed. Results appended to "+BULK_OUTPUT_FILE)
         elif option == 3:
-            print("SSL/TLS fingerprint single website - Not implemented yet.")
+            url_to_check = input("Enter the URL of the website for fingerprint check:\n")
+            if not url_to_check.startswith(('http://', 'https://')):
+                url_to_check = 'https://' + url_to_check
+            fingerprint = get_website_fingerprint(url_to_check)
+            if fingerprint:
+                print(f"Fingerprint recorded: {fingerprint} (also appended to {LOG_FILE})")
+            else:
+                print(f"Failed to retrieve fingerprint for {url_to_check}. See {LOG_FILE} for details.")
         elif option == 4:
             print("Jarm check single website - Not implemented yet.")
         elif option == 0:
