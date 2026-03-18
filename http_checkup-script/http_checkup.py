@@ -7,11 +7,16 @@ import socket
 import hashlib
 import csv
 import time
+import concurrent.futures
 
 LOG_FILE = 'output.log'
 BULK_OUTPUT_FILE = 'output.csv'
 CUSTOM_USER_AGENT = 'python-http-checkup/1.0'
-MAX_REQUESTS_PER_SECOND = 5  # throttle setting for process_zone_file
+OTHER_PORTS = [8080, 8443, 22, 25, 587]
+# Port scan timeout in seconds
+PORT_SCAN_TIMEOUT = 1
+# To avoid overwhelming servers, we can limit the number of requests per second.
+MAX_REQUESTS_PER_SECOND = 5 
 REQUEST_INTERVAL = 1.0 / MAX_REQUESTS_PER_SECOND
 
 def get_website_status(url):
@@ -72,6 +77,30 @@ def get_website_fingerprint(url):
         print(message)
         return None
 
+def is_port_open(host, port, timeout=PORT_SCAN_TIMEOUT):
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.settimeout(timeout)
+    try:
+        result = sock.connect_ex((host, port))
+        return result == 0
+    except Exception:
+        return False
+    finally:
+        sock.close()
+
+def scan_ports(host, ports, timeout=PORT_SCAN_TIMEOUT):
+    open_ports = []
+    with concurrent.futures.ThreadPoolExecutor(max_workers=min(len(ports), 10)) as executor:
+        futures = {executor.submit(is_port_open, host, port, timeout): port for port in ports}
+        for future in concurrent.futures.as_completed(futures):
+            port = futures[future]
+            try:
+                if future.result():
+                    open_ports.append(port)
+            except Exception:
+                pass
+    return sorted(open_ports)
+
 
 def process_zone_file(file_path):
     try:
@@ -80,14 +109,20 @@ def process_zone_file(file_path):
     except FileNotFoundError:
         print(f"File {file_path} not found.")
         return
+    total_lines = len(lines)
+    processed = 0
+    skipped = 0
     with open(BULK_OUTPUT_FILE, 'a', newline='') as csvfile:
         writer = csv.writer(csvfile)
-        for line in lines:
+        for idx, line in enumerate(lines, start=1):
+            print(f"Processing {idx}/{total_lines} lines...", end='\r', flush=True)
             line = line.strip()
             if not line or line.startswith(';') or line.startswith('#'):
+                skipped += 1
                 continue
             fields = line.split()
             if len(fields) < 3:
+                skipped += 1
                 continue
             domain = fields[0].rstrip('.')
             if 'IN' in fields:
@@ -105,16 +140,17 @@ def process_zone_file(file_path):
                 irrelevant_prefixes = (
                     '_domainkey',
                     'autodiscover',
-                    'microsoft',
-                    '_acme-challenge',
                     '_validation',
                     '_dnstest',
                     '_spf',
                 )
                 normalized = domain.lstrip('.').lower()
-                if normalized.startswith(irrelevant_prefixes):
+                # Split the domain into labels and reject records where any label begins with an irrelevant prefix.
+                # This avoids matching portions of longer labels incorrectly via startswith at the full domain level,
+                # and ensures e.g. "foo._domainkey.example.com" is filtered out as intended.
+                labels = normalized.split('.')
+                if any(any(label.startswith(prefix) for prefix in irrelevant_prefixes) for label in labels):
                     continue
-
                 if not domain.startswith(('http://', 'https://')):
                     domain = 'https://' + domain
                 # Perform the check directly
@@ -138,14 +174,46 @@ def process_zone_file(file_path):
                         message = "The server couldn't fulfill the request."
                         status = str(e.code)
                 except URLError as e:
-                    message = "We failed to reach a server."
-                    status = ''
+                    parsed_url = urlparse(domain)
+                    host = parsed_url.hostname
+                    if host:
+                        port80_open = is_port_open(host, 80)
+                        port443_open = is_port_open(host, 443)
+                        if not port80_open and not port443_open:
+                            open_ports = scan_ports(host, OTHER_PORTS)
+                            if open_ports:
+                                port_list = ' '.join(str(p) for p in open_ports)
+                                message = (
+                                    f"Main ports 80/443 are closed; other open ports: {port_list}."
+                                    " Domain may still be in use on non-web services."
+                                )
+                                status = 'other-ports-open'
+                            else:
+                                message = (
+                                    "No common service ports are open 80 443 8080 8443 22 25 587."
+                                    " Candidate stale domain."
+                                )
+                                status = 'stale-candidate'
+                        else:
+                            message = "Failed to reach HTTP/S but 80/443 TCP appears open."
+                            status = 'tcp-available'
+                    else:
+                        message = "We failed to reach a server."
+                        status = ''
                 except Exception as e:
-                    message = "An unexpected error occurred."
-                    status = ''
+                    parsed_url = urlparse(domain)
+                    host = parsed_url.hostname
+                    if host is not None and not is_port_open(host, 80) and not is_port_open(host, 443):
+                        message = "Unexpected error and 80/443 closed; candidate stale domain."
+                        status = 'stale-candidate'
+                    else:
+                        message = "An unexpected error occurred."
+                        status = ''
                 writer.writerow([domain, message, status])
+                processed += 1
                 time.sleep(REQUEST_INTERVAL)
 
+    print(f"Zone file processing complete: {processed} records processed, {skipped} lines skipped (out of {total_lines} lines). ")
 
 # Text/CLI based menu 
 menu_options = {

@@ -1,13 +1,3 @@
-https://www.examplecorp.com,The server couldn't fulfill the request.,403
-https://api.examplecorp.com,The server couldn't fulfill the request.,403
-https://portal.examplecorp.com,The server couldn't fulfill the request.,403
-https://analytics.examplecorp.com,The server couldn't fulfill the request.,403
-https://dev.examplecorp.com,The server couldn't fulfill the request.,403
-https://staging.examplecorp.com,The server couldn't fulfill the request.,403
-https://status.examplecorp.com,The server couldn't fulfill the request.,403
-https://app.examplecorp.com,The server couldn't fulfill the request.,403
-https://cdn.examplecorp.com,The server couldn't fulfill the request.,403
-https://docs.examplecorp.com,The server couldn't fulfill the request.,403
 https://www.examplecorp.com,Redirected from https://www.examplecorp.com to https://www.hugedomains.com/domain_profile.cfm?d=examplecorp.com.,200
 https://api.examplecorp.com,Redirected from https://api.examplecorp.com to https://www.hugedomains.com/domain_profile.cfm?d=examplecorp.com.,200
 https://portal.examplecorp.com,Redirected from https://portal.examplecorp.com to https://www.hugedomains.com/domain_profile.cfm?d=examplecorp.com.,200
@@ -15,6 +5,7 @@ https://analytics.examplecorp.com,Redirected from https://analytics.examplecorp.
 https://dev.examplecorp.com,Redirected from https://dev.examplecorp.com to https://www.hugedomains.com/domain_profile.cfm?d=examplecorp.com.,200
 https://staging.examplecorp.com,Redirected from https://staging.examplecorp.com to https://www.hugedomains.com/domain_profile.cfm?d=examplecorp.com.,200
 https://status.examplecorp.com,Redirected from https://status.examplecorp.com to https://www.hugedomains.com/domain_profile.cfm?d=examplecorp.com.,200
+https://dummy.examplecorp.com,Redirected from https://dummy.examplecorp.com to https://www.hugedomains.com/domain_profile.cfm?d=examplecorp.com.,200
 https://app.examplecorp.com,Redirected from https://app.examplecorp.com to https://www.hugedomains.com/domain_profile.cfm?d=examplecorp.com.,200
 https://cdn.examplecorp.com,Redirected from https://cdn.examplecorp.com to https://www.hugedomains.com/domain_profile.cfm?d=examplecorp.com.,200
 https://docs.examplecorp.com,Redirected from https://docs.examplecorp.com to https://www.hugedomains.com/domain_profile.cfm?d=examplecorp.com.,200
@@ -25,6 +16,29 @@ https://analytics.examplecorp.com,Redirected from https://analytics.examplecorp.
 https://dev.examplecorp.com,Redirected from https://dev.examplecorp.com to https://www.hugedomains.com/domain_profile.cfm?d=examplecorp.com.,200
 https://staging.examplecorp.com,Redirected from https://staging.examplecorp.com to https://www.hugedomains.com/domain_profile.cfm?d=examplecorp.com.,200
 https://status.examplecorp.com,Redirected from https://status.examplecorp.com to https://www.hugedomains.com/domain_profile.cfm?d=examplecorp.com.,200
+https://staging-insights.qs.com,"No common service ports are open (80,443,8080,8443,22,25,587). Candidate stale domain.",stale-candidate
+https://app.examplecorp.com,Redirected from https://app.examplecorp.com to https://www.hugedomains.com/domain_profile.cfm?d=examplecorp.com.,200
+https://cdn.examplecorp.com,Redirected from https://cdn.examplecorp.com to https://www.hugedomains.com/domain_profile.cfm?d=examplecorp.com.,200
+https://docs.examplecorp.com,Redirected from https://docs.examplecorp.com to https://www.hugedomains.com/domain_profile.cfm?d=examplecorp.com.,200
+https://www.examplecorp.com,Redirected from https://www.examplecorp.com to https://www.hugedomains.com/domain_profile.cfm?d=examplecorp.com.,200
+https://api.examplecorp.com,Redirected from https://api.examplecorp.com to https://www.hugedomains.com/domain_profile.cfm?d=examplecorp.com.,200
+https://portal.examplecorp.com,Redirected from https://portal.examplecorp.com to https://www.hugedomains.com/domain_profile.cfm?d=examplecorp.com.,200
+https://analytics.examplecorp.com,Redirected from https://analytics.examplecorp.com to https://www.hugedomains.com/domain_profile.cfm?d=examplecorp.com.,200
+https://dev.examplecorp.com,Redirected from https://dev.examplecorp.com to https://www.hugedomains.com/domain_profile.cfm?d=examplecorp.com.,200
+https://staging.examplecorp.com,Redirected from https://staging.examplecorp.com to https://www.hugedomains.com/domain_profile.cfm?d=examplecorp.com.,200
+https://status.examplecorp.com,Redirected from https://status.examplecorp.com to https://www.hugedomains.com/domain_profile.cfm?d=examplecorp.com.,200
+https://staging-insights.qs.com,No common service ports are open 80 443 8080 8443 22 25 587. Candidate stale domain.,stale-candidate
+https://app.examplecorp.com,Redirected from https://app.examplecorp.com to https://www.hugedomains.com/domain_profile.cfm?d=examplecorp.com.,200
+https://cdn.examplecorp.com,Redirected from https://cdn.examplecorp.com to https://www.hugedomains.com/domain_profile.cfm?d=examplecorp.com.,200
+https://docs.examplecorp.com,Redirected from https://docs.examplecorp.com to https://www.hugedomains.com/domain_profile.cfm?d=examplecorp.com.,200
+https://www.examplecorp.com,Redirected from https://www.examplecorp.com to https://www.hugedomains.com/domain_profile.cfm?d=examplecorp.com.,200
+https://api.examplecorp.com,Redirected from https://api.examplecorp.com to https://www.hugedomains.com/domain_profile.cfm?d=examplecorp.com.,200
+https://portal.examplecorp.com,Redirected from https://portal.examplecorp.com to https://www.hugedomains.com/domain_profile.cfm?d=examplecorp.com.,200
+https://analytics.examplecorp.com,Redirected from https://analytics.examplecorp.com to https://www.hugedomains.com/domain_profile.cfm?d=examplecorp.com.,200
+https://dev.examplecorp.com,Redirected from https://dev.examplecorp.com to https://www.hugedomains.com/domain_profile.cfm?d=examplecorp.com.,200
+https://staging.examplecorp.com,Redirected from https://staging.examplecorp.com to https://www.hugedomains.com/domain_profile.cfm?d=examplecorp.com.,200
+https://status.examplecorp.com,Redirected from https://status.examplecorp.com to https://www.hugedomains.com/domain_profile.cfm?d=examplecorp.com.,200
+https://staging-insights.qs.com,Failed to reach HTTP/S but 80/443 TCP appears open.,tcp-available
 https://app.examplecorp.com,Redirected from https://app.examplecorp.com to https://www.hugedomains.com/domain_profile.cfm?d=examplecorp.com.,200
 https://cdn.examplecorp.com,Redirected from https://cdn.examplecorp.com to https://www.hugedomains.com/domain_profile.cfm?d=examplecorp.com.,200
 https://docs.examplecorp.com,Redirected from https://docs.examplecorp.com to https://www.hugedomains.com/domain_profile.cfm?d=examplecorp.com.,200
