@@ -19,7 +19,6 @@ dev.examplecorp.com.        300 IN  A   203.0.113.20
 staging.examplecorp.com.    300 IN  A   203.0.113.21
 status.examplecorp.com.     300 IN  A   203.0.113.22
 api._domainkey.examplecorp.com.     300 IN  A   203.0.113.22
-staging-insights.qs.com     300 IN  A   35.179.251.7
 
 ;; CNAME Records
 app.examplecorp.com.        300 IN  CNAME   www.examplecorp.com.

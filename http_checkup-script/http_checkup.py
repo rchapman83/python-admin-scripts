@@ -58,12 +58,12 @@ def get_website_fingerprint(url):
                 der_cert = ssock.getpeercert(binary_form=True)
                 sha256 = hashlib.sha256(der_cert).hexdigest().upper()
                 fingerprint = ':'.join(sha256[i:i+2] for i in range(0, len(sha256), 2))
+                # Cert details are not currently used in the message but could be logged or included if desired.
                 cert = ssock.getpeercert()
                 subject = cert.get('subject', ())
                 issuer = cert.get('issuer', ())
                 message = (
-                    f"SSL/TLS fingerprint for {url}: {fingerprint}. "
-                    f"Subject: {subject}. Issuer: {issuer}."
+                    f"SSL/TLS fingerprint for {url}: {fingerprint} "
                 )
                 timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 with open(LOG_FILE, 'a') as f:
@@ -171,7 +171,7 @@ def process_zone_file(file_path):
                         message = f"Redirect detected {e.code} -> {location}."
                         status = str(e.code)
                     else:
-                        message = "The server couldn't fulfill the request."
+                        message = " The server couldn't fulfill the request."
                         status = str(e.code)
                 except URLError as e:
                     parsed_url = urlparse(domain)
@@ -190,15 +190,15 @@ def process_zone_file(file_path):
                                 status = 'other-ports-open'
                             else:
                                 message = (
-                                    "No common service ports are open 80 443 8080 8443 22 25 587."
+                                    " No common service ports are open 80 443 8080 8443 22 25 587."
                                     " Candidate stale domain."
                                 )
                                 status = 'stale-candidate'
                         else:
-                            message = "Failed to reach HTTP/S but 80/443 TCP appears open."
+                            message = " Failed to reach HTTP/S but 80/443 TCP appears open."
                             status = 'tcp-available'
                     else:
-                        message = "We failed to reach a server."
+                        message = " We failed to reach a server."
                         status = ''
                 except Exception as e:
                     parsed_url = urlparse(domain)
