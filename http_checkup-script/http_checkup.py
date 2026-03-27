@@ -8,6 +8,8 @@ import hashlib
 import csv
 import time
 import concurrent.futures
+import subprocess
+import os
 
 LOG_FILE = 'output.log'
 BULK_OUTPUT_FILE = 'output.csv'
@@ -63,14 +65,62 @@ def get_website_fingerprint(url):
                 subject = cert.get('subject', ())
                 issuer = cert.get('issuer', ())
                 message = (
-                    f"SSL/TLS fingerprint for {url}: {fingerprint} "
+                    f"SSL/TLS fingerprint for {url}: {fingerprint} (colon-delimited) and {sha256} (plain hex) "
                 )
                 timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 with open(LOG_FILE, 'a') as f:
                     f.write(f"{timestamp}: {message}\n")
-                return fingerprint
+                return fingerprint, sha256
     except Exception as e:
         message = f"Error getting fingerprint for {url}: {e}"
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        with open(LOG_FILE, 'a') as f:
+            f.write(f"{timestamp}: {message}\n")
+        print(message)
+        return None, None
+
+def get_website_jarm(url):
+    parsed = urlparse(url)
+    if not parsed.scheme:
+        url = 'https://' + url
+        parsed = urlparse(url)
+    host = parsed.hostname
+    port = parsed.port or 443
+
+    if not host:
+        message = f"Invalid URL: {url}"
+        print(message)
+        return None
+
+    try:
+        result = subprocess.run(['python3', 'jarm.py', host], capture_output=True, text=True, cwd=os.path.dirname(__file__))
+        if result.returncode == 0:
+            output = result.stdout
+            # Extract JARM from output
+            for line in output.split('\n'):
+                if line.startswith('JARM: '):
+                    jarm = line.split('JARM: ')[1].strip()
+                    message = f"JARM fingerprint for {url}: {jarm}"
+                    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    with open(LOG_FILE, 'a') as f:
+                        f.write(f"{timestamp}: {message}\n")
+                    return jarm
+            # If not found
+            message = f"JARM not found in output for {url}"
+            timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            with open(LOG_FILE, 'a') as f:
+                f.write(f"{timestamp}: {message}\n")
+            print(message)
+            return None
+        else:
+            message = f"Error running jarm.py for {url}: {result.stderr}"
+            timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            with open(LOG_FILE, 'a') as f:
+                f.write(f"{timestamp}: {message}\n")
+            print(message)
+            return None
+    except Exception as e:
+        message = f"Exception running jarm.py for {url}: {e}"
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         with open(LOG_FILE, 'a') as f:
             f.write(f"{timestamp}: {message}\n")
@@ -147,7 +197,7 @@ def process_zone_file(file_path):
                 normalized = domain.lstrip('.').lower()
                 # Split the domain into labels and reject records where any label begins with an irrelevant prefix.
                 # This avoids matching portions of longer labels incorrectly via startswith at the full domain level,
-                # and ensures e.g. "foo._domainkey.example.com" is filtered out as intended.
+                # and ensures e.g. "something._domainkey.example.com" is filtered out as intended.
                 labels = normalized.split('.')
                 if any(any(label.startswith(prefix) for prefix in irrelevant_prefixes) for label in labels):
                     continue
@@ -254,13 +304,20 @@ if __name__ == "__main__":
             url_to_check = input("Enter the URL of the website for fingerprint check:\n")
             if not url_to_check.startswith(('http://', 'https://')):
                 url_to_check = 'https://' + url_to_check
-            fingerprint = get_website_fingerprint(url_to_check)
-            if fingerprint:
-                print(f"Fingerprint recorded: {fingerprint} (also appended to {LOG_FILE})")
+            fingerprint_colon, fingerprint_plain = get_website_fingerprint(url_to_check)
+            if fingerprint_colon:
+                print(f"Fingerprint recorded: {fingerprint_colon} (colon-delimited) \n {fingerprint_plain} (plain hex) results appended to {LOG_FILE}")
             else:
                 print(f"Failed to retrieve fingerprint for {url_to_check}. See {LOG_FILE} for details.")
         elif option == 4:
-            print("Jarm check single website - Not implemented yet.")
+            url_to_check = input("Enter the URL of the website for JARM check:\n")
+            if not url_to_check.startswith(('http://', 'https://')):
+                url_to_check = 'https://' + url_to_check
+            jarm = get_website_jarm(url_to_check)
+            if jarm:
+                print(f"JARM fingerprint recorded: {jarm} (also appended to {LOG_FILE})")
+            else:
+                print(f"Failed to retrieve JARM fingerprint for {url_to_check}. See {LOG_FILE} for details.")
         elif option == 0:
             print("Exiting...")
             exit()
