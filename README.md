@@ -1,11 +1,11 @@
 # http_checkup-script
-I'll put a description here later
+:memo: A script I’ve put together only using core Python libraries for portability. It's capable of doing basic web asset fingerprinting and availability checks. My use-case was to identify web assets that could be decommissioned to reduce attack surface.  
 
 # ntp-script
-Script used to get NTP time from time server verifying operations. 
+:watch: Script used to get NTP time from time server verifying operations. 
 
 # detectify-script
-Before running this script OS Environmental Variavles DETFY_KEY and DETFY_SECRET_KEY must be present.
+:mag: Before running this script OS Environmental Variavles DETFY_KEY and DETFY_SECRET_KEY must be present.
 
 `DETFY_KEY = Detectify API-key` <br>
 `DETFY_SECRET_KEY = Detectify API-secret`
