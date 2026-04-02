@@ -211,17 +211,17 @@ def process_zone_file(file_path):
                         final_url = response.geturl()
                         if final_url != domain:
                             message = f"Redirected from {domain} to {final_url}."
-                            status = str(status_code)
+                            status = str(status_code) + '- redirected'
                         else:
                             message = "Website is working fine."
-                            status = str(status_code)
+                            status = str(status_code) + '- http/s available'
                 except HTTPError as e:
                     if e.code in (301, 302, 303, 307, 308):
                         location = e.headers.get('Location', 'unknown') if hasattr(e, 'headers') else 'unknown'
                         message = f"Redirect detected {e.code} -> {location}."
                         status = str(e.code)
                     else:
-                        message = " The server couldn't fulfill the request."
+                        message = "The server couldn't fulfill the request."
                         status = str(e.code)
                 except URLError as e:
                     parsed_url = urlparse(domain)
@@ -234,22 +234,22 @@ def process_zone_file(file_path):
                             if open_ports:
                                 port_list = ' '.join(str(p) for p in open_ports)
                                 message = (
-                                    f"Main ports 80/443 are closed; other open ports: {port_list}."
-                                    " Domain may still be in use on non-web services."
+                                    f"Ports 80/443 are closed; other open ports: {port_list}."
+                                    " Domain may still be in use via non-web services."
                                 )
-                                status = 'other-ports-open'
+                                status = 'alt-tcp-available'
                             else:
                                 message = (
-                                    " No common service ports are open 80 443 8080 8443 22 25 587."
+                                    "No common service ports are open 80 443 8080 8443 22 25 587."
                                     " Candidate stale domain."
                                 )
-                                status = 'stale-candidate'
+                                status = 'tcp-unavailable'
                         else:
-                            message = " Failed to reach HTTP/S but 80/443 TCP appears open."
+                            message = "Failed to reach HTTP/S but 80/443 TCP appears open."
                             status = 'tcp-available'
                     else:
                         message = " We failed to reach a server."
-                        status = ''
+                        status = 'tcp-unreachable'
                 except Exception as e:
                     parsed_url = urlparse(domain)
                     host = parsed_url.hostname
